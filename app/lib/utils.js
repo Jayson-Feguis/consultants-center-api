@@ -34,3 +34,15 @@ export async function paginateTable(tableName, fields = undefined, page = 1, lim
     }
   }
 }
+
+export function ValidationError(error) {
+  return "ValidationError: " + error
+}
+
+export function NotFoundError(error) {
+  return "NotFoundError: " + error
+}
+
+export function UnauthorizedError(error) {
+  return "UnauthorizedError: " + error
+}
