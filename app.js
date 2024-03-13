@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from 'dotenv'
 import authRoutes from './app/api/auth/routes.js'
 import cors from 'cors';
+import { ERROR_CODES } from "./app/lib/constants.js";
 
 // To read .env file
 dotenv.config();
@@ -25,7 +26,9 @@ app.use((err, req, res, next) => {
 
   console.error(err.stack)
 
-  res.status(500).json({ error: true, status: 500, message: err?.message })
+  const code = ERROR_CODES[err?.message.split(':')[0]]
+
+  res.status(code ?? 500).json({ error: true, status: code ?? 500, message: err?.message ?? 'Something went wrong!' })
 
 })
 

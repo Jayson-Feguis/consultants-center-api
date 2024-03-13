@@ -9,10 +9,18 @@ export async function getUserById(id) {
 
 }
 
+export async function getUserAndRoleByEmail(email) {
 
-export async function createUser(firstName, lastName, email, password) {
+  const [user] = await mysql.query("SELECT * from `users` INNER JOIN `roles` ON users.roleId = roles.id where email=?", [email])
 
-  const [userId] = await mysql.query("INSERT INTO `users`(`firstName`, `lastName`, `email`, `password`) VALUES (?, ?, ?, ?)", [firstName, lastName, email, password])
+  return user[0]
+
+}
+
+
+export async function createUser(roleId, firstName, lastName, email, password) {
+
+  const [userId] = await mysql.query("INSERT INTO `users`(`roleId`,`firstName`, `lastName`, `email`, `password`) VALUES (?, ?, ?, ?)", [roleId, firstName, lastName, email, password])
 
   const [user] = await getUserById(userId.insertId)
 
