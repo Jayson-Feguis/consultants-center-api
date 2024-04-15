@@ -13,3 +13,31 @@ export const ACTIONS = {
   UPDATE: 'Update',
   Delete: 'Delete'
 }
+
+export const ANNOUNCEMENT_CATEGORY = {
+  ALL: 'ALL',
+  CUSTOM: 'CUSTOM'
+}
+
+export const ROLES = {
+  ADMIN: 'ADMIN',
+  SALES: 'SALES',
+  ACCTG: 'ACCTG',
+  APPRV: 'APPRV',
+  MARKETING: 'MARKETING',
+  HR: 'HR',
+  SUPPORT: 'SUPPORT',
+  PRESALES: 'PRESALES',
+  MD: 'MD',
+  GREENSTAR: 'GREENSTAR',
+  FTSI: 'FTSI',
+  BA: 'BA',
+  CLOUDTECH: 'CLOUDTECH',
+  AUDIT: 'AUDIT'
+}
+
+export const WORK_LOCATION = {
+  HOME: 'HOME',
+  OFFICE: 'OFFICE',
+  ONSITE: 'ONSITE'
+}
