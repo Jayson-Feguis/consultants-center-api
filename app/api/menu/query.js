@@ -1,70 +1,59 @@
-import mysql from '../../config/db.config.js'
+export async function getMenus(dbconnection) {
+  const [menus] = await dbconnection.query("SELECT * FROM `menus`")
 
-
-export async function getMenusByRoleId(roleId) {
-  const [menus] = await mysql.query("SELECT `menus`.`id`, `menus`.`name`, `menus`.`icon`, `menus`.`component`, `menus`.`path` FROM `menu_per_role` INNER JOIN `roles` ON `menu_per_role`.`roleId` = `roles`.`id` INNER JOIN `menus` ON `menu_per_role`.`menuId` = `menus`.`id` WHERE `roles`.`id` = ? AND  `menus`.`parentId` = 0", [roleId])
-
-  const menusWithSubMenus = await Promise.all(menus.map(async menu => {
-    menu.subMenus = await fetchSubMenusByRoleId(roleId, menu);
-
-    if (menu.subMenus.length > 0) menu.hasSub = true;
-    else menu.hasSub = false
-
-    return menu;
-  }));
-
-  return menusWithSubMenus;
+  return menus
 }
 
-async function fetchSubMenusByRoleId(roleId, menu) {
-  const [subMenus] = await mysql.query("SELECT `menus`.`id`, `menus`.`name`, `menus`.`icon`, `menus`.`component`, `menus`.`path` FROM `menu_per_role` INNER JOIN `roles` ON `menu_per_role`.`roleId` = `roles`.`id` INNER JOIN `menus` ON `menu_per_role`.`menuId` = `menus`.`id` WHERE `roles`.`id` = ? AND  `menus`.`parentId` = ?", [roleId, menu.id])
+export async function getMenusById(dbconnection, id) {
+  const [menus] = await dbconnection.query("SELECT * FROM `menus` WHERE id = ?", [id])
 
-  if (subMenus.length > 0) {
-
-    const subMenusWithChildren = await Promise.all(subMenus.map(async subMenu => {
-      subMenu.subMenus = await fetchSubMenusByRoleId(roleId, subMenu);
-
-      if (subMenu.subMenus.length > 0) subMenu.hasSub = true;
-      else subMenu.hasSub = false
-
-      return subMenu;
-    }));
-
-    return subMenusWithChildren;
-
-  } else return []
+  return menus
 }
 
-export async function getMenusByUserId(userId) {
-  const [menus] = await mysql.query("SELECT `menus`.`id`, `menus`.`name`, `menus`.`icon`, `menus`.`component`, `menus`.`path` FROM `menu_per_user` INNER JOIN `users` ON `menu_per_user`.`userId` = `users`.`id` INNER JOIN `menus` ON `menu_per_user`.`menuId` = `menus`.`id` WHERE `users`.`id` = ? AND  `menus`.`parentId` = 0", [userId])
+export async function getMenusByRoleAndUserId(dbconnection, role, userId) {
+  const [menus] = await dbconnection.query("SELECT  `menus`.`id`, `menus`.`parentId`, `menus`.`name`, `menus`.`component`, `menus`.`path`, `menus`.`icon` FROM menus LEFT JOIN `menu_per_user` ON `menus`.`id` = `menu_per_user`.`menuId` AND `menu_per_user`.`userId` = ? INNER JOIN `menu_per_role` ON `menus`.`id` = `menu_per_role`.`menuId` AND `menu_per_role`.`role` = ? WHERE (`menu_per_user`.`isIncluded` = 'YES' OR `menu_per_user`.`isIncluded` IS NULL) ORDER BY `menu_per_user`.`id` DESC", [userId, role])
 
-  const menusWithSubMenus = await Promise.all(menus.map(async menu => {
-    menu.subMenus = await fetchSubMenusByUserId(userId, menu);
-
-    if (menu.subMenus.length > 0) menu.hasSub = true;
-    else menu.hasSub = false
-
-    return menu;
-  }));
-
-  return menusWithSubMenus;
+  return menus
 }
 
-async function fetchSubMenusByUserId(userId, menu) {
-  const [subMenus] = await mysql.query("SELECT `menus`.`id`, `menus`.`name`, `menus`.`icon`, `menus`.`component`, `menus`.`path` FROM `menu_per_user` INNER JOIN `users` ON `menu_per_user`.`userId` = `users`.`id` INNER JOIN `menus` ON `menu_per_user`.`menuId` = `menus`.`id` WHERE `users`.`id` = ? AND  `menus`.`parentId` = ?", [userId, menu.id])
+export async function createMenu(dbconnection, parentId, name, icon, component, path) {
+  let query, params;
 
-  if (subMenus.length > 0) {
+  if (parentId) {
+    query = "INSERT INTO `menus`( `parentId`, `name`, `icon`, `component`, `path`) VALUES (?,?,?,?,?)"
+    params = [parentId, name, icon, component, path]
+  } else {
+    query = "INSERT INTO `menus`(`name`, `icon`, `component`, `path`) VALUES (?,?,?,?)"
+    params = [name, icon, component, path]
+  }
 
-    const subMenusWithChildren = await Promise.all(subMenus.map(async subMenu => {
-      subMenu.subMenus = await fetchSubMenusByUserId(userId, subMenu);
+  const [result] = await dbconnection.query(query, params)
 
-      if (subMenu.subMenus.length > 0) subMenu.hasSub = true;
-      else subMenu.hasSub = false
+  const [menu] = await getMenusById(dbconnection, result.insertId);
 
-      return subMenu;
-    }));
+  return menu
+}
 
-    return subMenusWithChildren;
+export async function updateMenu(dbconnection, id, parentId, name, icon, component, path) {
+  let query, params;
 
-  } else return []
+  if (parentId) {
+    query = "UPDATE `menus` SET `parentId` = ?, `name` = ?, `icon` = ?, `component` = ?, `path` = ? WHERE id = ?"
+    params = [parentId, name, icon, component, path, id]
+  } else {
+    query = "UPDATE `menus` SET `name` = ?, `icon` = ?, `component` = ?, `path` = ? WHERE id = ?"
+    params = [name, icon, component, path, id]
+  }
+
+  await dbconnection.query(query, params)
+
+  const [menu] = await getMenusById(dbconnection, id);
+
+  return menu
+}
+
+export async function deleteMenu(dbconnection, id) {
+  const [menu] = await dbconnection.query("DELETE FROM `menus` WHERE id = ?", [id])
+
+  return menu
 }

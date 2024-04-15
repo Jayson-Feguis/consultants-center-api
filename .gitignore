@@ -5,6 +5,3 @@ yarn.lock
 
 #env
 .env
-.env.development.example
-.env.local.example
-.env.production.example
