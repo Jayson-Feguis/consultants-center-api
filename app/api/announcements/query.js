@@ -1,11 +1,17 @@
-export async function getAnnouncementsForAll(dbconnection) {
-  const [announcements] = await dbconnection.query(`
-    SELECT 
-          announcements.* 
-    FROM 
-          announcements 
-    LEFT JOIN 
-          medias ON medias.id = announcements.image`)
+import { addSearchQuery } from "../../lib/utils.js"
+
+export async function getAnnouncementsForAll(dbconnection, filters) {
+  let queryString = `
+  SELECT 
+        announcements.* 
+  FROM 
+        announcements 
+  LEFT JOIN 
+        medias ON medias.id = announcements.image`
+
+  const { query, params } = addSearchQuery('announcements', queryString, filters)
+
+  const [announcements] = await dbconnection.query(query, params)
 
   return announcements
 }

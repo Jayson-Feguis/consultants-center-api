@@ -6,7 +6,7 @@ import { ANNOUNCEMENT_CATEGORY } from "../../lib/constants.js";
 import { createAnnouncementCustom, deleteAnnouncementCustomByAnnouncementId } from "../announcements_custom/query.js";
 
 export const getAnnouncements = async (req, res) => {
-  let announcements = await getAnnouncementsPerDb(req.dbconnection)
+  let announcements = await getAnnouncementsPerDb(req.dbconnection, req.query)
 
   announcements = await Promise.all(announcements.map(async announcement => {
     const [announcementImage] = await getMediaById(req.dbconnection, announcement.image)
@@ -14,8 +14,6 @@ export const getAnnouncements = async (req, res) => {
 
     return announcement
   }))
-
-
 
   res.status(200).json(transformResponse(announcements));
 };
@@ -29,8 +27,6 @@ export const getAnnouncementsByUserId = async (req, res) => {
 
     return announcement
   }))
-
-
 
   res.status(200).json(transformResponse(announcements));
 };
@@ -46,8 +42,6 @@ export const createAnnouncements = async (req, res) => {
   const announcement = await createAnnouncementPerDb(req.dbconnection, title, description, media.insertId, isCustom === 'true' ? ANNOUNCEMENT_CATEGORY.CUSTOM : ANNOUNCEMENT_CATEGORY.ALL)
 
   if (isCustom) await Promise.all(receiver.map(async r => await createAnnouncementCustom(req.dbconnection, announcement.id, r)))
-
-
 
   res.status(201).json(announcement);
 };
@@ -73,8 +67,6 @@ export const updateAnnouncements = async (req, res) => {
 
   if (isCustom) await Promise.all(receiver.map(async r => await createAnnouncementCustom(req.dbconnection, announcement.id, r)))
 
-
-
   res.status(200).json(announcement);
 };
 
@@ -86,8 +78,6 @@ export const deleteAnnouncements = async (req, res) => {
   const announcement = await deleteAnnouncementPerDb(req.dbconnection, id)
 
   if (announcement.affectedRows <= 0) throw Error(NotFoundError('Announcement is not found'))
-
-
 
   res.status(200).json({ message: 'Announcement deleted successfully' });
 };

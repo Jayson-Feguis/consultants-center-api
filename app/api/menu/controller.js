@@ -1,17 +1,19 @@
-import { NotFoundError, transformResponse, ValidationError } from "../../lib/utils.js";
+import { NotFoundError, transformMenuData, transformResponse, ValidationError } from "../../lib/utils.js";
 import { deleteMenusPerRoleByMenuID } from "../menu_per_role/query.js";
 import { deleteMenusPerUserByMenuID } from "../menu_per_user/query.js";
 import { getMenus, createMenu, updateMenu, deleteMenu, getMenusByRoleAndUserId } from "./query.js";
 import { validateCreateMenu } from "./validation.js";
 
 export const getMenusPerUser = async (req, res) => {
-  const menus = await getMenusByRoleAndUserId(req.dbconnection, req.user.role, req.user.id)
+  let menus = await getMenusByRoleAndUserId(req.dbconnection, req.user.role, req.user.id)
+
+  menus = transformMenuData(menus)
 
   res.status(200).json(transformResponse(menus));
 };
 
 export const getAllMenus = async (req, res) => {
-  const menus = await getMenus(req.dbconnection)
+  const menus = await getMenus(req.dbconnection, req.query)
 
   res.status(200).json(transformResponse(menus));
 };

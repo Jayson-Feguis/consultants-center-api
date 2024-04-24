@@ -13,6 +13,7 @@ import dtrRoutes from './app/api/dtr/routes.js'
 import locationLogsRoutes from './app/api/location_logs/routes.js'
 import mediaRoutes from './app/api/media/routes.js'
 import menuRoutes from './app/api/menu/routes.js'
+import menuPerUserRoutes from './app/api/menu_per_user/routes.js'
 import menuPerRoleRoutes from './app/api/menu_per_role/routes.js'
 import userRoutes from './app/api/user/routes.js'
 
@@ -37,6 +38,7 @@ app.use(dtrRoutes)
 app.use(locationLogsRoutes)
 app.use(mediaRoutes)
 app.use(menuRoutes)
+app.use(menuPerUserRoutes)
 app.use(menuPerRoleRoutes)
 app.use(userRoutes)
 
