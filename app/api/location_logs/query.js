@@ -34,8 +34,8 @@ export async function getLocationLogById(dbconnection, id) {
 
 export async function createLocationLog(dbconnection, checkedInLocation, checkedInCoordinates, userId) {
   const [result] = await dbconnection.query(`
-  INSERT INTO log_location
-      (checkedinlocation, checkedin, checkedincoordinates, datelogged, location, createdby, uid, logdate) 
+  INSERT INTO 
+      log_location (checkedinlocation, checkedin, checkedincoordinates, datelogged, location, createdby, uid, logdate) 
   VALUES 
       (?,?,?,?,?,?,?,?)`, [checkedInLocation, new Date(), checkedInCoordinates, new Date(), WORK_LOCATION.HOME, userId, userId, new Date()])
 
@@ -46,11 +46,26 @@ export async function createLocationLog(dbconnection, checkedInLocation, checked
 
 export async function updateLocationLog(dbconnection, id, checkedOutLocation, checkedOutDate, checkedOutCoordinates) {
   await dbconnection.query(`
-  UPDATE log_location 
+  UPDATE 
+      log_location 
   SET 
       checkedoutlocation = ?, checkedout = ?, checkedoutcoordinates = ?
   WHERE 
       id = ?`, [checkedOutLocation, checkedOutDate, checkedOutCoordinates, id])
+
+  const [locationLog] = await getLocationLogById(dbconnection, id);
+
+  return locationLog
+}
+
+export async function updateLocationLogAdjustment(dbconnection, id, checkedIn, checkedOut, remarks) {
+  await dbconnection.query(`
+  UPDATE 
+      log_location 
+  SET 
+      checkedin = ?, checkedout = ?, isAdjusted = ?, remarks = ?, dateupdated = ?
+  WHERE 
+      id = ?`, [checkedIn, checkedOut, 1, remarks, new Date(), id])
 
   const [locationLog] = await getLocationLogById(dbconnection, id);
 

@@ -1,5 +1,11 @@
-export async function getMenus(dbconnection) {
-  const [menus] = await dbconnection.query("SELECT * FROM `menus`")
+import { addSearchQuery } from "../../lib/utils.js";
+
+export async function getMenus(dbconnection, filters) {
+  let queryString = `SELECT * FROM menus`;
+
+  const { query, params } = addSearchQuery('menus', queryString, filters)
+
+  const [menus] = await dbconnection.query(query, params)
 
   return menus
 }
@@ -11,7 +17,46 @@ export async function getMenusById(dbconnection, id) {
 }
 
 export async function getMenusByRoleAndUserId(dbconnection, role, userId) {
-  const [menus] = await dbconnection.query("SELECT  `menus`.`id`, `menus`.`parentId`, `menus`.`name`, `menus`.`component`, `menus`.`path`, `menus`.`icon` FROM menus LEFT JOIN `menu_per_user` ON `menus`.`id` = `menu_per_user`.`menuId` AND `menu_per_user`.`userId` = ? INNER JOIN `menu_per_role` ON `menus`.`id` = `menu_per_role`.`menuId` AND `menu_per_role`.`role` = ? WHERE (`menu_per_user`.`isIncluded` = 'YES' OR `menu_per_user`.`isIncluded` IS NULL) ORDER BY `menu_per_user`.`id` DESC", [userId, role])
+  const [menus] = await dbconnection.query(`
+  (
+      SELECT 
+          m.id, 
+          m.parentId, 
+          m.name, 
+          m.component, 
+          m.path, 
+          m.icon 
+      FROM 
+          menus m
+      INNER JOIN 
+          menu_per_role mpr
+          ON m.id = mpr.menuId 
+          AND mpr.role = ?
+      LEFT JOIN
+          menu_per_user mpu
+          ON m.id = mpu.menuId 
+          AND mpu.userId = ?
+      WHERE 
+          (mpu.isIncluded = 'YES' OR mpu.isIncluded IS NULL)
+  )
+  UNION 
+  (
+      SELECT 
+          m.id, 
+          m.parentId, 
+          m.name, 
+          m.component, 
+          m.path, 
+          m.icon 
+      FROM 
+          menus m
+      INNER JOIN 
+          menu_per_user mpu
+          ON m.id = mpu.menuId 
+          AND mpu.userId = ?
+      WHERE 
+          (mpu.isIncluded = 'YES' OR mpu.isIncluded IS NULL)
+  )`, [role, userId, userId])
 
   return menus
 }

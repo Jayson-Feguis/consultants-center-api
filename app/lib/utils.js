@@ -49,6 +49,23 @@ export function generateAccessToken(user, expiresIn = process.env.ACCESS_TOKEN_D
   return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn })
 }
 
+export function addSearchQuery(tableName, query, filters) {
+  let params = [];
+
+  const keys = Object.keys(filters).filter((key) => Boolean(filters[key]));
+
+  if (keys.length > 0) {
+    query += ' WHERE ';
+    query += keys.map((key) => {
+      params.push(`%${filters[key]}%`);
+      return `${tableName}.${key} LIKE ?`;
+    }).join(' AND ');
+  }
+
+  return {
+    query, params
+  }
+}
 
 export async function paginateTable(tableName, fields = undefined, page = 1, limit = 25) {
   if (+page <= 0) throw Error('Page should not be less than 1')
@@ -86,6 +103,35 @@ export function transformResponse(response) {
     data: response,
     pagination: {}
   }
+}
+
+export function transformMenuData(data) {
+  // Create a map to store items by their ID
+  const idMap = new Map();
+
+  // Iterate through the data and group items by their ID
+  data.forEach(item => {
+    if (!idMap.has(item.id)) {
+      idMap.set(item.id, item);
+    }
+  });
+
+  // Iterate through the data again and add submenus to items with children
+  data.forEach(item => {
+    if (item.parentId !== null && idMap.has(item.parentId)) {
+      const parentItem = idMap.get(item.parentId);
+      if (!parentItem.subMenus) {
+        parentItem.subMenus = [];
+      }
+      parentItem.subMenus.push(item);
+      parentItem.hasSub = true;
+    }
+  });
+
+  // Filter out the items without parents, i.e., top-level menu items
+  const transformedData = Array.from(idMap.values()).filter(item => item.parentId === null);
+
+  return transformedData;
 }
 
 export function ValidationError(error) {

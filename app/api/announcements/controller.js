@@ -5,7 +5,7 @@ import { createMedia, getMediaById } from "../media/query.js";
 import defaultDbConnection from '../../config/db.config.js'
 
 export const getAnnouncements = async (req, res) => {
-  let announcements = await getAnnouncementsForAll(defaultDbConnection)
+  let announcements = await getAnnouncementsForAll(defaultDbConnection, req.query)
 
   announcements = await Promise.all(announcements.map(async announcement => {
     const [announcementImage] = await getMediaById(defaultDbConnection, announcement.image)

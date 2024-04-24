@@ -1,6 +1,6 @@
 import { transformResponse, ValidationError } from "../../lib/utils.js";
-import { createLocationLog, getLocationLogsByMonth, getOneCurrentLocationLogByUserId, updateLocationLog } from "./query.js";
-import { validateCheckIn, validateCheckOut, validateGetLocationLogsByMonth } from "./validation.js";
+import { createLocationLog, getLocationLogsByMonth, getOneCurrentLocationLogByUserId, updateLocationLog, updateLocationLogAdjustment } from "./query.js";
+import { validateCheckIn, validateCheckOut, validateGetLocationLogsByMonth, validateLogAdjustment } from "./validation.js";
 
 export const getLocationLogByMonth = async (req, res) => {
   await validateGetLocationLogsByMonth(req.params)
@@ -43,4 +43,15 @@ export const checkOut = async (req, res) => {
   else throw Error(ValidationError('You already checked out today'))
 
   res.status(201).json(locationLogs);
+};
+
+export const updateLogAdjustment = async (req, res) => {
+  console.log(req.body)
+  await validateLogAdjustment({ ...req.params, ...req.body })
+  const { id } = req.params
+  const { date, timeIn, timeOut, remarks } = req.body
+
+  const adjustment = await updateLocationLogAdjustment(req.dbconnection, id, `${date} ${timeIn}`, `${date} ${timeOut}`, remarks)
+  console.log(adjustment)
+  res.status(201).json(adjustment);
 };

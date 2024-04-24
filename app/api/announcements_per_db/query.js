@@ -1,11 +1,17 @@
-export async function getAnnouncementsPerDb(dbconnection) {
-  const [announcements] = await dbconnection.query(`
+import { addSearchQuery } from "../../lib/utils.js";
+
+export async function getAnnouncementsPerDb(dbconnection, filters) {
+  let queryString = `
     SELECT 
-          announcements_per_db.* 
+      announcements_per_db.* 
     FROM 
-          announcements_per_db 
+      announcements_per_db 
     LEFT JOIN 
-          medias ON medias.id = announcements_per_db.image`)
+      medias ON medias.id = announcements_per_db.image
+  `;
+  const { query, params } = addSearchQuery('announcements_per_db', queryString, filters)
+
+  const [announcements] = await dbconnection.query(query, params)
 
   return announcements
 }
