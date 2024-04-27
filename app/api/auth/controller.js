@@ -55,7 +55,7 @@ export const login = async (req, res) => {
 
   if (!user || !(bcrypt.compareSync(password, user.upswd))) throw Error('Invalid email and password')
 
-  const accessToken = generateAccessToken({ id: user.uid, role: user.utype })
+  const accessToken = generateAccessToken({ id: user.uid, role: user.utype, approver: user.urtype })
   const ipAddress = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   const userAgent = req.headers["user-agent"];
 

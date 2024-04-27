@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import bcrypt from 'bcrypt'
 import AWS from 'aws-sdk'
+import moment from 'moment';
 
 dotenv.config()
 
@@ -57,14 +58,34 @@ export function addSearchQuery(tableName, query, filters) {
   if (keys.length > 0) {
     query += ' WHERE ';
     query += keys.map((key) => {
-      params.push(`%${filters[key]}%`);
-      return `${tableName}.${key} LIKE ?`;
+      const dateRangeRegex = /\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$/;
+
+      // Check if the filter value represents a date range
+      if (dateRangeRegex.test(filters[key])) {
+        params.push(filters[key].split(',')[0]);
+        params.push(filters[key].split(',')[1]);
+        params.push(filters[key].split(',')[0]);
+        params.push(filters[key].split(',')[1]);
+        return `(${tableName}.${key} BETWEEN ? AND ? OR ${tableName}.${key} IN (?, ?))`;
+      }
+      // Check if the filter value represents a comparison operation such as greater than or less than a number
+      else if (/^[<>]=?\d+$/.test(filters[key])) {
+        const operator = filters[key][0]; // Extract the comparison operator
+        const value = filters[key].substring(1); // Extract the numerical value
+        params.push(value);
+        return `${tableName}.${key} ${operator} ?`;
+      }
+      // Default case for string matching
+      else {
+        params.push(`%${filters[key]}%`);
+        return `${tableName}.${key} LIKE ?`;
+      }
     }).join(' AND ');
   }
 
   return {
     query, params
-  }
+  };
 }
 
 export async function paginateTable(tableName, fields = undefined, page = 1, limit = 25) {

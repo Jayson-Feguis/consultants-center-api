@@ -1,3 +1,10 @@
+export const APPROVER = {
+  CONSULTANT: 'CONSULTANT',
+  L1_APPROVER: 'L1 APPROVER',
+  L2_APPROVER: 'L2 APPROVER',
+  MD_APPROVER: 'MD APPROVER'
+}
+
 export const EMAIL_TEMPLATE_CODE = {
   RESET_PASSWORD: 'RESETPASSWORD'
 }
@@ -34,6 +41,12 @@ export const ROLES = {
   BA: 'BA',
   CLOUDTECH: 'CLOUDTECH',
   AUDIT: 'AUDIT'
+}
+
+export const STATUS = {
+  PENDING: 'Pending',
+  APPROVED: 'Approved',
+  REJECTED: 'Rejected'
 }
 
 export const WORK_LOCATION = {
