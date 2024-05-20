@@ -1,12 +1,22 @@
+import { WORK_LOCATION } from "../../lib/constants.js";
 import { transformResponse, ValidationError } from "../../lib/utils.js";
-import { createLocationLog, getLocationLogsAdjustments, getLocationLogsByMonth, getOneCurrentLocationLogByUserId, updateApprove, updateApproveAll, updateLocationLog, updateLocationLogAdjustment } from "./query.js";
-import { validateApprove, validateApproveAll, validateCheckIn, validateCheckOut, validateGetLocationLogsByMonth, validateLogAdjustment } from "./validation.js";
+import { createLocationLog, getLocationLogByDate, getLocationLogsAdjustments, getLocationLogsByMonth, getOneCurrentLocationLogByUserId, updateApprove, updateApproveAll, updateLocationLog, updateLocationLogAdjustment } from "./query.js";
+import { validateApprove, validateApproveAll, validateCheckIn, validateCheckOut, validateGetLocationLogsByDate, validateGetLocationLogsByMonth, validateLogAdjustment } from "./validation.js";
 
 export const getLocationLogByMonth = async (req, res) => {
   await validateGetLocationLogsByMonth(req.params)
   const { year, month } = req.params
 
   const locationLogs = await getLocationLogsByMonth(req.dbconnection, year, month)
+
+  res.status(200).json(transformResponse(locationLogs));
+};
+
+export const getLocationLogByDates = async (req, res) => {
+  await validateGetLocationLogsByDate(req.params)
+  const { date } = req.params
+
+  const locationLogs = await getLocationLogByDate(req.dbconnection, date)
 
   res.status(200).json(transformResponse(locationLogs));
 };
@@ -31,7 +41,7 @@ export const checkIn = async (req, res) => {
 
   const [latestLog] = await getOneCurrentLocationLogByUserId(req.dbconnection, req.user.id)
 
-  if (!latestLog) locationLogs = await createLocationLog(req.dbconnection, checkedInLocation, checkedInCoordinates, req.user.id)
+  if (!latestLog) locationLogs = await createLocationLog(req.dbconnection, { checkedinlocation: checkedInLocation, checkedin: new Date(), checkedincoordinates: checkedInCoordinates, datelogged: new Date(), location: WORK_LOCATION.HOME, createdby: req.user.id, uid: req.user.id, logdate: new Date() })
   else throw Error(ValidationError('You already checked in today'))
 
   res.status(201).json(locationLogs);

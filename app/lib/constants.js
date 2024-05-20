@@ -1,3 +1,14 @@
+export const ACTIONS = {
+  CREATE: 'Create',
+  UPDATE: 'Update',
+  Delete: 'Delete'
+}
+
+export const ANNOUNCEMENT_CATEGORY = {
+  ALL: 'ALL',
+  CUSTOM: 'CUSTOM'
+}
+
 export const APPROVER = {
   CONSULTANT: 'CONSULTANT',
   L1_APPROVER: 'L1 APPROVER',
@@ -15,15 +26,21 @@ export const ERROR_CODES = {
   'NotFoundError': 404,
 }
 
-export const ACTIONS = {
-  CREATE: 'Create',
-  UPDATE: 'Update',
-  Delete: 'Delete'
+export const HIRING_STATUS = {
+  HIRED: 'Hired',
+  POOLED: 'Pooled',
+  REJECTED: 'Rejected'
 }
 
-export const ANNOUNCEMENT_CATEGORY = {
-  ALL: 'ALL',
-  CUSTOM: 'CUSTOM'
+export const LEAVE_DURATION = {
+  HALF_DAY: 'Halfday',
+  WHOLE_DAY: 'Wholeday'
+}
+
+export const LEAVE_TYPE = {
+  SICK_LEAVE: 'SL',
+  VACATION_LEAVE: 'VL',
+  EMERGENCY_LEAVE: 'EL'
 }
 
 export const ROLES = {

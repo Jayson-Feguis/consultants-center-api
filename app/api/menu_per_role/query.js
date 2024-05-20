@@ -1,3 +1,5 @@
+import { insertIntoQuery } from "../../lib/utils.js"
+
 export async function getRolesFromMenusPerRole(dbconnection) {
   const [menusPerRole] = await dbconnection.query(`
   SELECT 
@@ -28,8 +30,10 @@ export async function getMenusPerRoleByRole(dbconnection, role) {
   return menusPerRole
 }
 
-export async function createMenuPerRole(dbconnection, role, menuId) {
-  const [result] = await dbconnection.query("INSERT INTO `menu_per_role`( `role`, `menuId`) VALUES (?,?)", [role, menuId])
+export async function createMenuPerRole(dbconnection, options) {
+  const { query, params } = insertIntoQuery(`menu_per_role`, options)
+
+  const [result] = await dbconnection.query(query, params)
 
   const [menuPerRole] = await getMenusPerRoleById(dbconnection, result.insertId);
 

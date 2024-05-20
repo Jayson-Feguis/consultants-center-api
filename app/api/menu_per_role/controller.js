@@ -24,7 +24,7 @@ export const createMenusPerRole = async (req, res) => {
 
   if (perRole.length > 0) throw Error(ValidationError(`${role} role is already created. Please check the table`))
 
-  const menuPerRole = await Promise.all(menus.map(async menuId => await createMenuPerRole(req.dbconnection, role, menuId)))
+  const menuPerRole = await Promise.all(menus.map(async menuId => await createMenuPerRole(req.dbconnection, { role, menuId })))
 
   res.status(201).json(menuPerRole);
 };
@@ -42,7 +42,7 @@ export const updateMenusPerRole = async (req, res) => {
 
   await deleteMenusPerRoleByRole(req.dbconnection, role)
 
-  const menuPerRole = await Promise.all(menus.map(async menuId => await createMenuPerRole(req.dbconnection, role, menuId)))
+  const menuPerRole = await Promise.all(menus.map(async menuId => await createMenuPerRole(req.dbconnection, { role, menuId })))
 
   res.status(200).json(menuPerRole);
 };

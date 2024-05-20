@@ -1,9 +1,9 @@
-import { addSearchQuery } from "../../lib/utils.js";
+import { whereQuery, insertIntoQuery } from "../../lib/utils.js";
 
 export async function getMenus(dbconnection, filters) {
   let queryString = `SELECT * FROM menus`;
 
-  const { query, params } = addSearchQuery('menus', queryString, filters)
+  const { query, params } = whereQuery('menus', queryString, filters)
 
   const [menus] = await dbconnection.query(query, params)
 
@@ -61,16 +61,18 @@ export async function getMenusByRoleAndUserId(dbconnection, role, userId) {
   return menus
 }
 
-export async function createMenu(dbconnection, parentId, name, icon, component, path) {
-  let query, params;
+export async function createMenu(dbconnection, options) {
+  // let query, params;
 
-  if (parentId) {
-    query = "INSERT INTO `menus`( `parentId`, `name`, `icon`, `component`, `path`) VALUES (?,?,?,?,?)"
-    params = [parentId, name, icon, component, path]
-  } else {
-    query = "INSERT INTO `menus`(`name`, `icon`, `component`, `path`) VALUES (?,?,?,?)"
-    params = [name, icon, component, path]
-  }
+  // if (parentId) {
+  //   query = "INSERT INTO `menus`( `parentId`, `name`, `icon`, `component`, `path`) VALUES (?,?,?,?,?)"
+  //   params = [parentId, name, icon, component, path]
+  // } else {
+  //   query = "INSERT INTO `menus`(`name`, `icon`, `component`, `path`) VALUES (?,?,?,?)"
+  //   params = [name, icon, component, path]
+  // }
+
+  const { query, params } = insertIntoQuery(`menus`, options)
 
   const [result] = await dbconnection.query(query, params)
 

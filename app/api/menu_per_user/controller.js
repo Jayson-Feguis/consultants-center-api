@@ -33,8 +33,8 @@ export const createMenusPerUser = async (req, res) => {
 
   await deleteMenusPerUserByUserId(req.dbconnection, userId)
 
-  const included = await Promise.all(includedMenus.map(async menuId => await createMenuPerUser(req.dbconnection, userId, menuId, 'YES')))
-  const excluded = await Promise.all(excludedMenus.map(async menuId => await createMenuPerUser(req.dbconnection, userId, menuId, 'NO')))
+  const included = await Promise.all(includedMenus.map(async menuId => await createMenuPerUser(req.dbconnection, { userId, menuId, isIncluded: 'YES' })))
+  const excluded = await Promise.all(excludedMenus.map(async menuId => await createMenuPerUser(req.dbconnection, { userId, menuId, isIncluded: 'NO' })))
 
   res.status(201).json({ id: userId, user: userId, includedMenus: included, excludedMenus: excluded });
 };

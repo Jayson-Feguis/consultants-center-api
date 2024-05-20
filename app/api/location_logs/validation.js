@@ -2,8 +2,12 @@ import * as Yup from 'yup';
 import { STATUS } from '../../lib/constants.js';
 
 export const validateGetLocationLogsByMonth = (data) => Yup.object().shape({
-  year: Yup.number().required('Month as parameter is required').label('Month'),
+  year: Yup.number().required('Year as parameter is required').label('Year'),
   month: Yup.number().required('Month as parameter is required').label('Month'),
+}).validate(data);
+
+export const validateGetLocationLogsByDate = (data) => Yup.object().shape({
+  date: Yup.string().required('Date as parameter is required').label('Date'),
 }).validate(data);
 
 export const validateCheckIn = (data) => Yup.object().shape({
