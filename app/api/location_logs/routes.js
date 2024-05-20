@@ -1,5 +1,5 @@
 import express from "express";
-import { checkIn, checkOut, getLocationLogByMonth, getCurrentLocationLog, updateLogAdjustment, getLocationLogAdjustments, approveAll, approve } from "./controller.js";
+import { checkIn, checkOut, getLocationLogByMonth, getCurrentLocationLog, updateLogAdjustment, getLocationLogAdjustments, approveAll, approve, getLocationLogByDates } from "./controller.js";
 import { auth, dbConnection, isApprover } from "../../lib/middleware.js";
 import multer from "multer";
 
@@ -13,9 +13,11 @@ const router = express.Router();
 
 router.get(`${endpoint}/:year/:month`, auth, dbConnection, getLocationLogByMonth);
 
+router.get(`${endpoint}/checkedin/date/:date`, auth, dbConnection, getLocationLogByDates);
+
 router.get(`${endpoint}/current`, auth, dbConnection, getCurrentLocationLog);
 
-router.get(`${endpoint}/adjustments`, auth, dbConnection, getLocationLogAdjustments);
+router.get(`${endpoint}/adjustments`, auth, dbConnection, isApprover, getLocationLogAdjustments);
 
 router.post(endpoint, auth, dbConnection, multer().none(), checkIn);
 

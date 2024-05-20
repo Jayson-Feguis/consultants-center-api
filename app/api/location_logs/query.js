@@ -1,5 +1,4 @@
-import { WORK_LOCATION } from "../../lib/constants.js"
-import { addSearchQuery } from "../../lib/utils.js"
+import { insertIntoQuery, whereQuery } from "../../lib/utils.js"
 
 export async function getLocationLogs(dbconnection) {
     const [locationLogs] = await dbconnection.query(`
@@ -26,8 +25,7 @@ export async function getLocationLogsAdjustments(dbconnection, filters) {
     filters['status'] = 'Pending'
 
 
-    const { query, params } = addSearchQuery('log_location', queryString, filters)
-    console.log(filters, query, params)
+    const { query, params } = whereQuery('log_location', queryString, filters)
 
     const [locationLogs] = await dbconnection.query(query, params)
 
@@ -66,12 +64,21 @@ export async function getLocationLogById(dbconnection, id) {
     return locationLogs
 }
 
-export async function createLocationLog(dbconnection, checkedInLocation, checkedInCoordinates, userId) {
-    const [result] = await dbconnection.query(`
-  INSERT INTO 
-      log_location (checkedinlocation, checkedin, checkedincoordinates, datelogged, location, createdby, uid, logdate) 
-  VALUES 
-      (?,?,?,?,?,?,?,?)`, [checkedInLocation, new Date(), checkedInCoordinates, new Date(), WORK_LOCATION.HOME, userId, userId, new Date()])
+export async function getLocationLogByDate(dbconnection, date) {
+    const [locationLogs] = await dbconnection.query("SELECT * FROM `log_location` WHERE DATE(checkedin) = ? AND DATE(checkedout) = ?", [date, date])
+
+    return locationLogs
+}
+
+export async function createLocationLog(dbconnection, options) {
+    //     `
+    //   INSERT INTO 
+    //       log_location (checkedinlocation, checkedin, checkedincoordinates, datelogged, location, createdby, uid, logdate) 
+    //   VALUES 
+    //       (?,?,?,?,?,?,?,?)`, [checkedInLocation, new Date(), checkedInCoordinates, new Date(), WORK_LOCATION.HOME, userId, userId, new Date()]
+    const { query, params } = insertIntoQuery(`log_location`, options)
+
+    const [result] = await dbconnection.query(query, params)
 
     const [locationLog] = await getLocationLogById(dbconnection, result.insertId);
 

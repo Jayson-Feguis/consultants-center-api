@@ -37,9 +37,9 @@ export const createAnnouncements = async (req, res) => {
 
   const filePath = await uploadFileToS3(req.file)
 
-  const media = await createMedia(req.dbconnection, filePath)
+  const media = await createMedia(req.dbconnection, { filePath })
 
-  const announcement = await createAnnouncementPerDb(req.dbconnection, title, description, media.insertId, isCustom === 'true' ? ANNOUNCEMENT_CATEGORY.CUSTOM : ANNOUNCEMENT_CATEGORY.ALL)
+  const announcement = await createAnnouncementPerDb(req.dbconnection, { title, description, image: media.insertId, receiver: isCustom === 'true' ? ANNOUNCEMENT_CATEGORY.CUSTOM : ANNOUNCEMENT_CATEGORY.ALL })
 
   if (isCustom) await Promise.all(receiver.map(async r => await createAnnouncementCustom(req.dbconnection, announcement.id, r)))
 
@@ -57,7 +57,7 @@ export const updateAnnouncements = async (req, res) => {
   if (req.file) {
     const filePath = await uploadFileToS3(req.file)
 
-    media = await createMedia(req.dbconnection, filePath)
+    media = await createMedia(req.dbconnection, { filePath })
     media = media.insertId
   }
 

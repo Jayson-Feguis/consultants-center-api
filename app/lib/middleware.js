@@ -47,6 +47,10 @@ export const uploadImage = multer({
   },
 })
 
+export const uploadFiles = multer({
+  storage: multer.memoryStorage()
+})
+
 // Object to store connection pools for different databases
 const connectionPools = {};
 
@@ -108,8 +112,7 @@ export async function isHR(req, res, next) {
 }
 
 export async function isApprover(req, res, next) {
-  console.log(req.user)
-  if (req.user.approver === APPROVER.CONSULTANT || req.user.approver === APPROVER.MD_APPROVER) throw new Error(UnauthorizedError('Unauthorized to access this route'))
+  if (!req.user.approver || req.user.approver === APPROVER.CONSULTANT || req.user.approver === APPROVER.MD_APPROVER) throw new Error(UnauthorizedError('You are not an approver'))
 
   next();
 }
