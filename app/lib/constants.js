@@ -66,6 +66,30 @@ export const STATUS = {
   REJECTED: 'Rejected'
 }
 
+export const TICKET_CLASSIFICATION = {
+  CRET: 'CRET',
+  CHANGE_REQUEST: 'Change Request',
+  INCIDENT: 'Incident',
+  CLOUD: 'CLOUD',
+}
+
+export const TICKET_STATUS = {
+  NEW: 'New',
+  PENDING: 'Pending',
+  CHANGE: 'Change',
+  CLOSED: 'Close',
+  VOID: 'Void',
+  CANCEL: 'Cancel',
+  ONHOLD: 'Onhold'
+}
+
+export const TICKET_TYPE = {
+  FIX: 'Fix',
+  ENHANCEMENT: 'Enhancement',
+  CUSTOMIZATION: 'Customization',
+  OTHERS: 'Others',
+}
+
 export const WORK_LOCATION = {
   HOME: 'HOME',
   OFFICE: 'OFFICE',

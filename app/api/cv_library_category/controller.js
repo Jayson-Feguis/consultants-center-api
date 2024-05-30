@@ -1,12 +1,15 @@
 import _ from "lodash";
 import { NotFoundError, transformResponse, ValidationError } from "../../lib/utils.js";
-import { getCVLibraryBusinessUnitById } from "../cv_library_business_unit/query.js";
-import { getCVLibraryModuleById } from "../cv_library_module/query.js";
-import { getCVLibraryPrincipalById } from "../cv_library_principal/query.js";
-import { getCVLibraryProductById } from "../cv_library_product/query.js";
-import { getCVLibrarySubProductById } from "../cv_library_sub_product/query.js";
-import { getCVLibraryCategory, createCVLibraryCategory, updateCVLibraryCategory, deleteCVLibraryCategory } from "./query.js";
+import { createCVLibraryBusinessUnit, getCVLibraryBusinessUnitById, getCVLibraryBusinessUnitByTitle } from "../cv_library_business_unit/query.js";
+import { createCVLibraryModule, getCVLibraryModuleById, getCVLibraryModuleByTitle } from "../cv_library_module/query.js";
+import { createCVLibraryPrincipal, getCVLibraryPrincipalById, getCVLibraryPrincipalByTitle } from "../cv_library_principal/query.js";
+import { createCVLibraryProduct, getCVLibraryProductById, getCVLibraryProductByTitle } from "../cv_library_product/query.js";
+import { createCVLibrarySubProduct, getCVLibrarySubProductById, getCVLibrarySubProductByTitle } from "../cv_library_sub_product/query.js";
+import { getCVLibraryCategory, createCVLibraryCategory, updateCVLibraryCategory, deleteCVLibraryCategory, getCVLibraryCategoryByCategory } from "./query.js";
 import { validateCreateCVLibraryCategory, validateUpdateCVLibraryCategory } from "./validation.js";
+import * as XLSX from 'xlsx'
+
+let cachedBusinessUnit = {}, cachedModule = {}, cachedPrincipal = {}, cachedProduct = {}, cachedSubProduct = {}
 
 export const getCVLibraryCategories = async (req, res) => {
   let cvLibraryCategories = await getCVLibraryCategory(req.dbconnection, req.query)
@@ -157,19 +160,120 @@ export const createCVLibraryCategories = async (req, res) => {
 
 export const createCVLibraryCategoriesImport = async (req, res) => {
   const { type } = req.params
-  const requiredTypes = []
-  if (!req.files?.singleFile) throw Error(ValidationError('Please attached file'))
+  let file = req.files?.singleFile
+  const requiredTypes = {
+    excel: [
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel.sheet.macroEnabled.12',
+      'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
+      'application/vnd.oasis.opendocument.spreadsheet',
+      'application/csv',  // Less common, sometimes encountered
+      'text/csv',
+      'text/spreadsheet', // For SYLK files
+      'text/tab-separated-values' // For TSV files
+    ]
+  }
 
-  if (req.files?.singleFile?.length !== 1) throw Error(ValidationError('One (1) file is required'))
+  if (!file) throw Error(ValidationError('Please attached file'))
+
+  if (file?.length !== 1) throw Error(ValidationError('One (1) file is required'))
 
   if (!type) throw Error(ValidationError('Import type as parameter is required'))
 
-  console.log(req.files?.singleFile[0])
+  file = file[0]
 
-  // const cvLibraryCategory = await createCVLibraryCategory(req.dbconnection, req.body)
+  if (!requiredTypes[type].includes(file?.mimetype)) throw Error(ValidationError('Invalid file'))
 
-  res.status(201).json({ message: 'OK' });
+  const transformedData = [], newInserted = [];
+  let i = 0;
+
+  if (type === 'excel') {
+    const workbook = XLSX.read(file.buffer, { type: 'buffer' })
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+
+    for (const item of data) {
+      let transformedItem = { ...item };
+
+      // BUSINESS UNIT
+      const { newItem: businessUnitItem } = await cachedAndTransformCategories(req, transformedItem, item, 'businessUnit')
+      transformedItem = { ...businessUnitItem }
+
+      // MODULE
+      const { newItem: moduleItem } = await cachedAndTransformCategories(req, transformedItem, item, 'module')
+      transformedItem = { ...moduleItem }
+
+      // PRINCIPAL
+      const { newItem: principalItem } = await cachedAndTransformCategories(req, transformedItem, item, 'principal')
+      transformedItem = { ...principalItem }
+
+      // PRODUCT
+      const { newItem: productItem } = await cachedAndTransformCategories(req, transformedItem, item, 'product')
+      transformedItem = { ...productItem }
+
+      // SUB PRODUCT
+      const { newItem: subProductItem } = await cachedAndTransformCategories(req, transformedItem, item, 'subProduct')
+      transformedItem = { ...subProductItem }
+
+      transformedData.push(transformedItem);
+    }
+
+    for (const item of transformedData) {
+      const isExist = await getCVLibraryCategoryByCategory(req.dbconnection, item.businessUnit, item.module, item.principal, item.product, item.subProduct)
+
+      if (isExist.length <= 0) {
+        await createCVLibraryCategory(req.dbconnection, item)
+        newInserted.push({ row: i + 1, ...data[i] })
+      }
+      i = i + 1;
+    }
+  }
+
+
+  res.status(201).json({ message: 'OK', newInserted });
 };
+
+const nullishValue = ['', 'n/a', 'N/A']
+
+async function cachedAndTransformCategories(req, transformedItem, item, key) {
+  const newItem = { ...transformedItem }
+  const newCached = key === 'businessUnit' ? cachedBusinessUnit : key === 'module' ? cachedModule : key === 'principal' ? cachedPrincipal : key === 'product' ? cachedProduct : key === 'subProduct' ? cachedSubProduct : {}
+
+  // CHECK IF VALUE IS NULL
+  if (!item[key] || nullishValue.includes(item[key])) newItem[key] = null
+
+  // CHECK IF THIS IS NOT CACHED
+  else if (!newCached?.[item[key]]) {
+
+    const [result] = key === 'businessUnit' ? await getCVLibraryBusinessUnitByTitle(req.dbconnection, newItem[key])
+      : key === 'module' ? await getCVLibraryModuleByTitle(req.dbconnection, newItem[key])
+        : key === 'principal' ? await getCVLibraryPrincipalByTitle(req.dbconnection, newItem[key])
+          : key === 'product' ? await getCVLibraryProductByTitle(req.dbconnection, newItem[key])
+            : key === 'subProduct' ? await getCVLibrarySubProductByTitle(req.dbconnection, newItem[key]) : [null];
+    // IF THIS IS EXISTING IN THE DATABASE
+    if (result) {
+      newItem[key] = result.id;
+      newCached[item[key]] = result.id;
+    }
+    // CREATE NEW SINCE THIS IS NOT EXISTING IN THE DATABASE
+    else {
+      const result = key === 'businessUnit' ? await createCVLibraryBusinessUnit(req.dbconnection, { title: newItem[key] })
+        : key === 'module' ? await createCVLibraryModule(req.dbconnection, { title: newItem[key] })
+          : key === 'principal' ? await createCVLibraryPrincipal(req.dbconnection, { title: newItem[key] })
+            : key === 'product' ? await createCVLibraryProduct(req.dbconnection, { title: newItem[key] })
+              : key === 'subProduct' ? await createCVLibrarySubProduct(req.dbconnection, { title: newItem[key] }) : null;
+
+      if (result) {
+        newItem[key] = result.id;
+        newCached[item[key]] = result.id;
+      }
+    }
+  } else newItem[key] = newCached[item[key]];
+
+  return { newItem, newCached }
+}
 
 export const updateCVLibraryCategories = async (req, res) => {
   await validateUpdateCVLibraryCategory({ ...req.params, ...req.body })

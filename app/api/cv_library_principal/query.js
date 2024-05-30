@@ -20,6 +20,12 @@ export async function getCVLibraryPrincipalById(dbconnection, id) {
   return cvLibraryPrincipal
 }
 
+export async function getCVLibraryPrincipalByTitle(dbconnection, title) {
+  const [cvLibraryPrincipal] = await dbconnection.query("SELECT * FROM `cv_library_principal` WHERE title = ?", [title])
+
+  return cvLibraryPrincipal
+}
+
 export async function createCVLibraryPrincipal(dbconnection, options) {
   const { query, params } = insertIntoQuery(`cv_library_principal`, options)
 

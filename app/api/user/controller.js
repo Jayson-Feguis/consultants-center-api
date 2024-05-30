@@ -19,9 +19,20 @@ export const allUsers = async (req, res) => {
 export const getUserForAnnouncement = async (req, res) => {
   const users = await getUsersForAnnouncement(req.dbconnection)
 
-
-
   res.status(200).json(transformResponse(users));
+};
+
+export const getUsersById = async (req, res) => {
+  let [user] = await getUserById(req.dbconnection, req.params?.id)
+
+  user = _.omit(user, ['upswd', 'udb'])
+
+  if (_.has(user, 'uprofilepic')) {
+    const [profile] = await getMediaById(req.dbconnection, user.uprofilepic)
+    user.uprofilepic = profile
+  }
+
+  res.status(200).json(transformResponse(user));
 };
 
 export const changePassword = async (req, res) => {

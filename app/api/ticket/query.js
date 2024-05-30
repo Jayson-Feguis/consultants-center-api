@@ -23,6 +23,8 @@ export async function getTicketById(dbconnection, id) {
 export async function createTicket(dbconnection, options) {
   const { query, params } = insertIntoQuery(`ticket`, options)
 
+  console.log(query, params)
+
   const [result] = await dbconnection.query(query, params)
 
   const [tickets] = await getTicketById(dbconnection, result.insertId);
