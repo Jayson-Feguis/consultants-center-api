@@ -20,6 +20,12 @@ export async function getCVLibraryModuleById(dbconnection, id) {
   return cvLibraryModule
 }
 
+export async function getCVLibraryModuleByTitle(dbconnection, title) {
+  const [cvLibraryModule] = await dbconnection.query("SELECT * FROM `cv_library_module` WHERE title = ?", [title])
+
+  return cvLibraryModule
+}
+
 export async function createCVLibraryModule(dbconnection, options) {
   const { query, params } = insertIntoQuery(`cv_library_module`, options)
 

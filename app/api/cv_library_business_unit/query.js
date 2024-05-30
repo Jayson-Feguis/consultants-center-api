@@ -20,6 +20,12 @@ export async function getCVLibraryBusinessUnitById(dbconnection, id) {
   return cvLibraryBusiness
 }
 
+export async function getCVLibraryBusinessUnitByTitle(dbconnection, title) {
+  const [cvLibraryBusiness] = await dbconnection.query("SELECT * FROM `cv_library_business_unit` WHERE title = ?", [title])
+
+  return cvLibraryBusiness
+}
+
 export async function createCVLibraryBusinessUnit(dbconnection, options) {
   const { query, params } = insertIntoQuery(`cv_library_business_unit`, options)
 

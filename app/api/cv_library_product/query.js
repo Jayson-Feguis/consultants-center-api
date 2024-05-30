@@ -19,6 +19,11 @@ export async function getCVLibraryProductById(dbconnection, id) {
 
   return cvLibraryProduct
 }
+export async function getCVLibraryProductByTitle(dbconnection, title) {
+  const [cvLibraryProduct] = await dbconnection.query("SELECT * FROM `cv_library_product` WHERE title = ?", [title])
+
+  return cvLibraryProduct
+}
 
 export async function createCVLibraryProduct(dbconnection, options) {
   const { query, params } = insertIntoQuery(`cv_library_product`, options)
