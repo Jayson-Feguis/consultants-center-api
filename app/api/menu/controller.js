@@ -20,9 +20,8 @@ export const getAllMenus = async (req, res) => {
 
 export const createMenus = async (req, res) => {
   await validateCreateMenu(req.body)
-  const { parentId, name, icon, component, path } = req.body
 
-  const menu = await createMenu(req.dbconnection, parentId, name, icon, component, path)
+  const menu = await createMenu(req.dbconnection, req.body)
 
   res.status(201).json(menu);
 };

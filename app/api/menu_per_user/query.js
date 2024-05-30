@@ -1,3 +1,5 @@
+import { insertIntoQuery } from "../../lib/utils.js"
+
 export async function getUsersFromMenusPerUser(dbconnection) {
   const [menusPerUser] = await dbconnection.query(`
   SELECT 
@@ -41,8 +43,10 @@ export async function getMenusPerUserByUserId(dbconnection, userId) {
   return menusPerUser
 }
 
-export async function createMenuPerUser(dbconnection, userId, menuId, isIncluded) {
-  const [result] = await dbconnection.query("INSERT INTO `menu_per_user`( `userId`, `menuId`, `isIncluded`) VALUES (?,?,?)", [userId, menuId, isIncluded])
+export async function createMenuPerUser(dbconnection, options) {
+  const { query, params } = insertIntoQuery(`menu_per_user`, options)
+
+  const [result] = await dbconnection.query(query, params)
 
   const [menuPerUser] = await getMenusPerUserById(dbconnection, result.insertId);
 

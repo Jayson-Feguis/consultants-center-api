@@ -3,9 +3,8 @@ import { validateCheckIn } from "./validation.js";
 
 export const checkIn = async (req, res) => {
   await validateCheckIn(req.body)
-  const { checkInLocation } = req.body
 
-  const dtr = await createDTR(req.dbconnection, checkInLocation)
+  const dtr = await createDTR(req.dbconnection, req.body)
 
   res.status(201).json(dtr);
 };

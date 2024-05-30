@@ -32,13 +32,12 @@ export const getActiveAnnouncements = async (req, res) => {
 
 export const createAnnouncements = async (req, res) => {
   await validateCreateAnnouncement(req.body)
-  const { title, description, isActive } = req.body
 
   const filePath = await uploadFileToS3(req.file)
 
-  const media = await createMedia(defaultDbConnection, filePath)
+  const media = await createMedia(defaultDbConnection, { filePath })
 
-  const announcement = await createAnnouncement(defaultDbConnection, title, description, media.insertId, isActive)
+  const announcement = await createAnnouncement(defaultDbConnection, { ...req.body, image: media.insertId })
 
   res.status(201).json(announcement);
 };
@@ -54,7 +53,7 @@ export const updateAnnouncements = async (req, res) => {
   if (req.file) {
     const filePath = await uploadFileToS3(req.file)
 
-    media = await createMedia(defaultDbConnection, filePath)
+    media = await createMedia(defaultDbConnection, { filePath })
     media = media.insertId
   }
 

@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { deleteAllSessionWhereTokenExpired, getSessionByToken } from "../api/session/query.js";
 import { NotFoundError, UnauthorizedError } from "../lib/utils.js";
 import { rateLimit } from 'express-rate-limit'
-import { ERROR_CODES, ROLES } from "./constants.js";
+import { APPROVER, ERROR_CODES, ROLES } from "./constants.js";
 import { getUserById } from "../api/user/query.js";
 import mysql from 'mysql2'
 import dotenv from 'dotenv'
@@ -45,6 +45,10 @@ export const uploadImage = multer({
   limits: {
     fileSize: 1000 * 1000 * 1, // accept file with 4MB size,
   },
+})
+
+export const uploadFiles = multer({
+  storage: multer.memoryStorage()
 })
 
 // Object to store connection pools for different databases
@@ -103,6 +107,12 @@ export async function auth(req, res, next) {
 // Check if user has token and not expired
 export async function isHR(req, res, next) {
   if (req.user.role !== ROLES.HR) throw new Error(UnauthorizedError('Unauthorized to access this route'))
+
+  next();
+}
+
+export async function isApprover(req, res, next) {
+  if (!req.user.approver || req.user.approver === APPROVER.CONSULTANT || req.user.approver === APPROVER.MD_APPROVER) throw new Error(UnauthorizedError('You are not an approver'))
 
   next();
 }

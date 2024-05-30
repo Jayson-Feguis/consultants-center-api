@@ -1,3 +1,21 @@
+export const ACTIONS = {
+  CREATE: 'Create',
+  UPDATE: 'Update',
+  Delete: 'Delete'
+}
+
+export const ANNOUNCEMENT_CATEGORY = {
+  ALL: 'ALL',
+  CUSTOM: 'CUSTOM'
+}
+
+export const APPROVER = {
+  CONSULTANT: 'CONSULTANT',
+  L1_APPROVER: 'L1 APPROVER',
+  L2_APPROVER: 'L2 APPROVER',
+  MD_APPROVER: 'MD APPROVER'
+}
+
 export const EMAIL_TEMPLATE_CODE = {
   RESET_PASSWORD: 'RESETPASSWORD'
 }
@@ -8,15 +26,21 @@ export const ERROR_CODES = {
   'NotFoundError': 404,
 }
 
-export const ACTIONS = {
-  CREATE: 'Create',
-  UPDATE: 'Update',
-  Delete: 'Delete'
+export const HIRING_STATUS = {
+  HIRED: 'Hired',
+  POOLED: 'Pooled',
+  REJECTED: 'Rejected'
 }
 
-export const ANNOUNCEMENT_CATEGORY = {
-  ALL: 'ALL',
-  CUSTOM: 'CUSTOM'
+export const LEAVE_DURATION = {
+  HALF_DAY: 'Halfday',
+  WHOLE_DAY: 'Wholeday'
+}
+
+export const LEAVE_TYPE = {
+  SICK_LEAVE: 'SL',
+  VACATION_LEAVE: 'VL',
+  EMERGENCY_LEAVE: 'EL'
 }
 
 export const ROLES = {
@@ -34,6 +58,36 @@ export const ROLES = {
   BA: 'BA',
   CLOUDTECH: 'CLOUDTECH',
   AUDIT: 'AUDIT'
+}
+
+export const STATUS = {
+  PENDING: 'Pending',
+  APPROVED: 'Approved',
+  REJECTED: 'Rejected'
+}
+
+export const TICKET_CLASSIFICATION = {
+  CRET: 'CRET',
+  CHANGE_REQUEST: 'Change Request',
+  INCIDENT: 'Incident',
+  CLOUD: 'CLOUD',
+}
+
+export const TICKET_STATUS = {
+  NEW: 'New',
+  PENDING: 'Pending',
+  CHANGE: 'Change',
+  CLOSED: 'Close',
+  VOID: 'Void',
+  CANCEL: 'Cancel',
+  ONHOLD: 'Onhold'
+}
+
+export const TICKET_TYPE = {
+  FIX: 'Fix',
+  ENHANCEMENT: 'Enhancement',
+  CUSTOMIZATION: 'Customization',
+  OTHERS: 'Others',
 }
 
 export const WORK_LOCATION = {

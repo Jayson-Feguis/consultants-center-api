@@ -1,4 +1,4 @@
-import { addSearchQuery } from "../../lib/utils.js"
+import { whereQuery, insertIntoQuery } from "../../lib/utils.js"
 
 export async function getAnnouncementsForAll(dbconnection, filters) {
   let queryString = `
@@ -9,7 +9,7 @@ export async function getAnnouncementsForAll(dbconnection, filters) {
   LEFT JOIN 
         medias ON medias.id = announcements.image`
 
-  const { query, params } = addSearchQuery('announcements', queryString, filters)
+  const { query, params } = whereQuery('announcements', queryString, filters)
 
   const [announcements] = await dbconnection.query(query, params)
 
@@ -33,8 +33,10 @@ export async function getAnnouncementsById(dbconnection, id) {
   return announcements
 }
 
-export async function createAnnouncement(dbconnection, title, description, image, isActive) {
-  const [result] = await dbconnection.query("INSERT INTO `announcements` (`title`, `description`, `image`, `isActive`) VALUES (?,?,?,?)", [title, description, image, isActive])
+export async function createAnnouncement(dbconnection, options) {
+  const { query, params } = insertIntoQuery(`announcements`, options)
+
+  const [result] = await dbconnection.query(query, params)
 
   const [announcement] = await getAnnouncementsById(dbconnection, result.insertId);
 
